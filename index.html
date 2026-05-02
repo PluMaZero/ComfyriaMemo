@@ -2,57 +2,68 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comfyria_Memo - 캐릭터 시트</title>
+    <title>캐릭터 시트 작성기 - 업로드 포함</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f3; display: flex; flex-direction: column; align-items: center; padding: 40px; margin: 0; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f7f6; display: flex; flex-direction: column; align-items: center; }
+        .container { display: flex; gap: 20px; max-width: 900px; width: 100%; }
+        .box { background: white; padding: 20px; border-radius: 10px; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         
-        .input-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; display: flex; gap: 10px; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 8px; width: 120px; }
-        button { padding: 10px 20px; background-color: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #4f46e5; }
-
-        .sheet { 
-            background: white; padding: 40px; width: 350px; border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-top: 10px solid #6366f1;
-            display: none; transition: 0.3s;
-        }
-        .sheet h2 { margin: 0 0 15px 0; color: #333; font-size: 24px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
-        .sheet p { margin: 10px 0; font-size: 18px; color: #555; }
-        .sheet span { font-weight: bold; color: #000; }
+        #preview { width: 100%; max-height: 300px; object-fit: contain; margin-top: 10px; border: 1px solid #ddd; }
+        textarea { width: 100%; height: 80px; margin-top: 10px; }
+        input { width: 90%; margin-bottom: 10px; padding: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>캐릭터 시트 생성기</h1>
+    <h1>캐릭터 시트 & 프롬프트 생성기</h1>
 
-    <div class="input-section">
-        <input type="text" id="name" placeholder="이름">
-        <input type="text" id="job" placeholder="직업">
-        <input type="number" id="hp" placeholder="HP">
-        <button onclick="createSheet()">생성하기</button>
-    </div>
+    <div class="container">
+        <!-- 왼쪽: 업로드 및 입력 -->
+        <div class="box">
+            <h3>이미지 업로드</h3>
+            <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+            <img id="preview" src="#" alt="미리보기" style="display:none;">
+            
+            <hr>
+            <input type="text" id="charName" placeholder="캐릭터 특징 (예: 갈색머리 모험가)">
+            <input type="text" id="outfit" placeholder="의상 컨셉 (예: 오렌지 셔츠와 베이지 바지)">
+            <button onclick="generatePrompts()">프롬프트 생성</button>
+        </div>
 
-    <div id="result" class="sheet">
-        <h2 id="out-name">캐릭터 이름</h2>
-        <p>직업: <span id="out-job"></span></p>
-        <p>체력(HP): <span id="out-hp"></span></p>
+        <!-- 오른쪽: 결과 출력 -->
+        <div class="box">
+            <h3>프롬프트 결과</h3>
+            <p>3면도 프롬프트:</p>
+            <textarea id="refSheet"></textarea>
+            <p>아이템 시트 프롬프트:</p>
+            <textarea id="itemSheet"></textarea>
+        </div>
     </div>
 
     <script>
-        function createSheet() {
-            // 입력값 가져오기
-            const name = document.getElementById('name').value;
-            const job = document.getElementById('job').value;
-            const hp = document.getElementById('hp').value;
+        // 1. 이미지 미리보기 기능
+        function previewImage(event) {
+            const preview = document.getElementById('preview');
+            const file = event.target.files[0];
+            const reader = new FileReader();
 
-            // 결과창에 넣기
-            document.getElementById('out-name').innerText = name || "이름 없음";
-            document.getElementById('out-job').innerText = job || "무직";
-            document.getElementById('out-hp').innerText = hp || "0";
+            reader.onload = function() {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            }
+            if (file) reader.readAsDataURL(file);
+        }
 
-            // 결과창 보이기
-            document.getElementById('result').style.display = 'block';
+        // 2. 프롬프트 생성 기능
+        function generatePrompts() {
+            const name = document.getElementById('charName').value;
+            const outfit = document.getElementById('outfit').value;
+
+            document.getElementById('refSheet').value = 
+                `Character sheet of ${name}, wearing ${outfit}, front view, side view, back view, standing on white background, high quality, anime style, flat color.`;
+            
+            document.getElementById('itemSheet').value = 
+                `Design sheet of items for ${name}, including ${outfit}, detailed accessories, detached objects, white background, high resolution.`;
         }
     </script>
 </body>

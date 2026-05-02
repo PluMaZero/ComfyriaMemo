@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comfyria_Memo - 캐릭터 시트 생성기</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #1e1e1e; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #e0e0e0; margin: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #1e1e1e; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #333; margin: 0; }
+        h1 { color: #ffffff; }
         .container { display: flex; gap: 20px; max-width: 1000px; width: 100%; align-items: flex-start; }
-        .box { background-color: #2d2d2d; padding: 25px; border-radius: 15px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        h3 { margin-top: 0; color: #ffffff; }
-        input, textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #555; border-radius: 8px; box-sizing: border-box; background-color: #3d3d3d; color: #fff; font-family: inherit; }
-        #preview { width: 100%; max-height: 300px; object-fit: contain; margin-bottom: 15px; border: 1px solid #555; display: none; }
+        
+        /* 박스는 흰색, 내부 글자는 어두운 색 */
+        .box { background-color: #ffffff; padding: 25px; border-radius: 15px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h3 { color: #333; margin-top: 0; }
+        
+        input, textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background-color: #f9f9f9; color: #333; font-family: inherit; }
+        #preview { width: 100%; max-height: 300px; object-fit: contain; margin-bottom: 15px; border: 1px solid #ddd; display: none; }
+        
         button { padding: 12px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
         button:hover { background-color: #6366f1; }
-        .copy-btn { background-color: #059669; }
-        .copy-btn:hover { background-color: #10b981; }
+        .copy-btn { background-color: #10b981; }
+        .copy-btn:hover { background-color: #059669; }
         textarea { height: 100px; resize: vertical; }
     </style>
 </head>

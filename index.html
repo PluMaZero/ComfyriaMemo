@@ -5,29 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comfyria_Memo - 캐릭터 시트 생성기</title>
     <style>
-        body { font-family: 'Pretendard', sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { display: flex; gap: 20px; max-width: 1000px; width: 100%; flex-wrap: wrap; }
-        .box { background: white; padding: 25px; border-radius: 15px; flex: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h3 { margin-top: 0; color: #333; }
-        input { width: 95%; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-        #preview { width: 100%; max-height: 300px; object-fit: contain; margin-bottom: 15px; border: 1px solid #eee; display: none; }
-        textarea { width: 100%; height: 100px; margin-top: 5px; font-size: 13px; padding: 10px; box-sizing: border-box; border-radius: 8px; border: 1px solid #ccc; }
-        button { padding: 10px 20px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
-        button:hover { background-color: #4338ca; }
-        .copy-btn { background-color: #10b981; margin-top: 5px; }
-        .copy-btn:hover { background-color: #059669; }
-
-        textarea { 
-            width: 100%; 
-            min-height: 80px; /* 높이 확보 */
-            margin-bottom: 15px; 
-            padding: 10px; 
-            border: 1px solid #ddd; 
-            border-radius: 8px; 
-            resize: vertical; /* 사용자가 높이를 조절할 수 있게 함 */
-            box-sizing: border-box; /* 패딩이 너비에 포함되게 함 */
-            font-family: inherit;
-        }
+        /* 전체 배경을 진한 회색으로 변경 */
+        body { 
+                font-family: 'Pretendard', sans-serif; 
+                background-color: #1e1e1e; /* 브라우저 느낌의 진한 회색 */
+                padding: 20px; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                color: #e0e0e0; /* 글자색을 밝게 */
+            }
+            
+            h1 { color: #ffffff; }
+        
+            /* 입력 및 결과 박스 스타일 조정 */
+            .box { 
+                background-color: #2d2d2d; /* 박스는 약간 더 밝은 회색 */
+                padding: 25px; 
+                border-radius: 15px; 
+                flex: 1; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+            }
+            
+            h3 { color: #ffffff; }
+            
+            /* 입력창 및 텍스트 영역 테마 적용 */
+            input, textarea { 
+                background-color: #3d3d3d; 
+                color: #ffffff; 
+                border: 1px solid #555; 
+                border-radius: 8px; 
+                padding: 10px;
+                box-sizing: border-box;
+            }
+        
+            /* 버튼 스타일 조정 */
+            button { 
+                padding: 10px 20px; 
+                background-color: #4f46e5; 
+                color: white; 
+                border: none; 
+                border-radius: 8px; 
+                cursor: pointer; 
+                font-weight: bold; 
+                width: 100%; 
+            }
+            button:hover { background-color: #6366f1; }
+            
+            .copy-btn { background-color: #059669; margin-top: 5px; }
+            .copy-btn:hover { background-color: #10b981; }
+        
+            #preview { 
+                width: 100%; 
+                max-height: 300px; 
+                object-fit: contain; 
+                margin-bottom: 15px; 
+                border: 1px solid #555; 
+                display: none; 
+            }
     </style>
 </head>
 <body>

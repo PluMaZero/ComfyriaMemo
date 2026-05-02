@@ -5,64 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comfyria_Memo - 캐릭터 시트 생성기</title>
     <style>
-        /* 전체 배경을 진한 회색으로 변경 */
-        body { 
-                font-family: 'Pretendard', sans-serif; 
-                background-color: #1e1e1e; /* 브라우저 느낌의 진한 회색 */
-                padding: 20px; 
-                display: flex; 
-                flex-direction: column; 
-                align-items: center; 
-                color: #e0e0e0; /* 글자색을 밝게 */
-            }
-            
-            h1 { color: #ffffff; }
-        
-            /* 입력 및 결과 박스 스타일 조정 */
-            .box { 
-                background-color: #2d2d2d; /* 박스는 약간 더 밝은 회색 */
-                padding: 25px; 
-                border-radius: 15px; 
-                flex: 1; 
-                box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            }
-            
-            h3 { color: #ffffff; }
-            
-            /* 입력창 및 텍스트 영역 테마 적용 */
-            input, textarea { 
-                background-color: #3d3d3d; 
-                color: #ffffff; 
-                border: 1px solid #555; 
-                border-radius: 8px; 
-                padding: 10px;
-                box-sizing: border-box;
-            }
-        
-            /* 버튼 스타일 조정 */
-            button { 
-                padding: 10px 20px; 
-                background-color: #4f46e5; 
-                color: white; 
-                border: none; 
-                border-radius: 8px; 
-                cursor: pointer; 
-                font-weight: bold; 
-                width: 100%; 
-            }
-            button:hover { background-color: #6366f1; }
-            
-            .copy-btn { background-color: #059669; margin-top: 5px; }
-            .copy-btn:hover { background-color: #10b981; }
-        
-            #preview { 
-                width: 100%; 
-                max-height: 300px; 
-                object-fit: contain; 
-                margin-bottom: 15px; 
-                border: 1px solid #555; 
-                display: none; 
-            }
+        body { font-family: 'Pretendard', sans-serif; background-color: #1e1e1e; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #e0e0e0; margin: 0; }
+        .container { display: flex; gap: 20px; max-width: 1000px; width: 100%; align-items: flex-start; }
+        .box { background-color: #2d2d2d; padding: 25px; border-radius: 15px; flex: 1; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h3 { margin-top: 0; color: #ffffff; }
+        input, textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #555; border-radius: 8px; box-sizing: border-box; background-color: #3d3d3d; color: #fff; font-family: inherit; }
+        #preview { width: 100%; max-height: 300px; object-fit: contain; margin-bottom: 15px; border: 1px solid #555; display: none; }
+        button { padding: 12px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; }
+        button:hover { background-color: #6366f1; }
+        .copy-btn { background-color: #059669; }
+        .copy-btn:hover { background-color: #10b981; }
+        textarea { height: 100px; resize: vertical; }
     </style>
 </head>
 <body>
@@ -75,13 +28,9 @@
             <h3>이미지 업로드 및 정보 입력</h3>
             <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
             <img id="preview" src="#" alt="미리보기">
-            
             <input type="text" id="charName" placeholder="캐릭터 특징 (예: 갈색머리 모험가)">
-            
-            <!-- 멀티라인 입력 가능한 textarea로 변경 -->
             <textarea id="outfit" placeholder="주요 의상 (예: 오렌지 셔츠, 베이지 바지)"></textarea>
             <textarea id="items" placeholder="아이템 상세 (예: 가죽 배낭, 나침반, 목걸이, 등산화)"></textarea>
-            
             <button onclick="generatePrompts()">프롬프트 생성하기</button>
         </div>
 
@@ -103,10 +52,7 @@
             const preview = document.getElementById('preview');
             const file = event.target.files[0];
             const reader = new FileReader();
-            reader.onload = () => {
-                preview.src = reader.result;
-                preview.style.display = 'block';
-            }
+            reader.onload = () => { preview.src = reader.result; preview.style.display = 'block'; }
             if (file) reader.readAsDataURL(file);
         }
 
@@ -114,12 +60,8 @@
             const name = document.getElementById('charName').value;
             const outfit = document.getElementById('outfit').value;
             const items = document.getElementById('items').value;
-
-            document.getElementById('refSheet').value = 
-                `Character sheet of ${name}, wearing ${outfit}, front view, side view, back view, standing on white background, high quality, anime style, flat color, masterpiece.`;
-            
-            document.getElementById('itemSheet').value = 
-                `Design sheet of isolated items and accessories for ${name}, including ${outfit} and ${items}. Items arranged neatly on a plain white background, professional reference sheet style, high resolution, detailed texture, no character, no human, flat 2D layout, clear edges, product photography.`;
+            document.getElementById('refSheet').value = `Character sheet of ${name}, wearing ${outfit}, front view, side view, back view, standing on white background, high quality, anime style, flat color, masterpiece.`;
+            document.getElementById('itemSheet').value = `Design sheet of isolated items and accessories for ${name}, including ${outfit} and ${items}. Items arranged neatly on a plain white background, professional reference sheet style, high resolution, detailed texture, no character, no human, flat 2D layout, clear edges, product photography.`;
         }
 
         function copyText(id) {

@@ -16,6 +16,18 @@
         button:hover { background-color: #4338ca; }
         .copy-btn { background-color: #10b981; margin-top: 5px; }
         .copy-btn:hover { background-color: #059669; }
+
+        textarea { 
+            width: 100%; 
+            min-height: 80px; /* 높이 확보 */
+            margin-bottom: 15px; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            resize: vertical; /* 사용자가 높이를 조절할 수 있게 함 */
+            box-sizing: border-box; /* 패딩이 너비에 포함되게 함 */
+            font-family: inherit;
+        }
     </style>
 </head>
 <body>
@@ -30,8 +42,10 @@
             <img id="preview" src="#" alt="미리보기">
             
             <input type="text" id="charName" placeholder="캐릭터 특징 (예: 갈색머리 모험가)">
-            <input type="text" id="outfit" placeholder="주요 의상 (예: 오렌지 셔츠, 베이지 바지)">
-            <input type="text" id="items" placeholder="아이템 상세 (예: 가죽 배낭, 나침반, 등산화)">
+            
+            <!-- 멀티라인 입력 가능한 textarea로 변경 -->
+            <textarea id="outfit" placeholder="주요 의상 (예: 오렌지 셔츠, 베이지 바지)"></textarea>
+            <textarea id="items" placeholder="아이템 상세 (예: 가죽 배낭, 나침반, 목걸이, 등산화)"></textarea>
             
             <button onclick="generatePrompts()">프롬프트 생성하기</button>
         </div>

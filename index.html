@@ -3,86 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comfyria_Memo - 캐릭터 시트 & 3D 뷰어 & 아카이브</title>
+    <title>Comfyria_Memo - 3D & 실시간 공유 아카이브</title>
     
-    <!-- 1. model-viewer 라이브러리 로드 (3D 뷰어용) -->
+    <!-- 라이브러리 로드 -->
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-    
-    <style>
-        /* 기본 레이아웃 설정 */
-        body { font-family: 'Pretendard', sans-serif; background-color: #1e1e1e; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #333; margin: 0; }
-        h1 { color: #ffffff; margin-bottom: 20px; }
-        h3 { color: #333; margin-top: 0; margin-bottom: 15px; }
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"
+      }
+    }
+    </script>
 
-        /* 가로 배치용 컨테이너 (3단 구성) */
+    <style>
+        /* [1. 디자인 설정] */
+        body { font-family: 'Pretendard', sans-serif; background-color: #1e1e1e; padding: 20px; display: flex; flex-direction: column; align-items: center; color: #333; margin: 0; }
+        h1 { color: #ffffff; margin-bottom: 25px; }
         .container { display: flex; gap: 20px; max-width: 1500px; width: 100%; align-items: flex-start; flex-wrap: wrap; justify-content: center; }
-        
-        /* 기본 박스 스타일 */
         .box { background-color: #ffffff; padding: 25px; border-radius: 15px; flex: 1; min-width: 350px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); box-sizing: border-box; }
-        
-        /* 입력 요소 스타일 */
-        input, textarea { width: 100%; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background-color: #f9f9f9; color: #333; font-family: inherit; }
-        #preview { width: 100%; max-height: 250px; object-fit: contain; margin-bottom: 15px; border: 1px solid #ddd; display: none; }
-        
-        /* 버튼 스타일 */
-        button { padding: 12px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; transition: 0.2s; }
+        h3 { color: #333; margin-top: 0; margin-bottom: 15px; }
+        input, textarea { width: 100%; margin-bottom: 12px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background-color: #f9f9f9; font-family: inherit; }
+        button { padding: 12px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 8px; transition: 0.2s; }
         button:hover { background-color: #6366f1; }
         .copy-btn { background-color: #10b981; }
-        .copy-btn:hover { background-color: #059669; }
-        textarea { height: 80px; resize: vertical; }
 
-        /* --- 3D 뷰어 구역 --- */
+        /* [2. 3D 뷰어 & 사이드패널] */
         .viewer-box { position: relative; width: 100%; height: 400px; background-color: #282828; border-radius: 10px; overflow: hidden; }
         model-viewer { width: 100%; height: 100%; }
-        
         .side-panel { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 100; pointer-events: none; }
-        .ctrl-btn { pointer-events: auto; background: rgba(0,0,0,0.7); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; backdrop-filter: blur(4px); cursor: pointer; padding: 4px 8px; font-size: 10px; width: fit-content; }
+        .ctrl-btn { pointer-events: auto; background: rgba(0,0,0,0.7); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 4px 8px; font-size: 10px; width: fit-content; cursor: pointer; }
         .ctrl-btn.active { color: #4ade80; border-color: #4ade80; }
-        .ctrl-slider { pointer-events: auto; background: rgba(0,0,0,0.7); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 6px 8px; font-size: 9px; width: 100px; display: flex; flex-direction: column; gap: 4px; }
-        .ctrl-stats { pointer-events: none; background: rgba(0,0,0,0.7); color: #aaa; border-radius: 4px; padding: 6px 8px; font-size: 9px; font-family: monospace; }
+        .ctrl-slider { pointer-events: auto; background: rgba(0,0,0,0.7); color: white; padding: 6px 8px; border-radius: 4px; font-size: 9px; width: 100px; display: flex; flex-direction: column; gap: 4px; }
+        .ctrl-stats { background: rgba(0,0,0,0.7); color: #aaa; padding: 6px 8px; border-radius: 4px; font-size: 9px; font-family: monospace; }
 
-        /* --- 게시판 구역 --- */
+        /* [3. 게시판 설정] */
         .archive-section { width: 100%; max-width: 1460px; margin-top: 40px; }
         .post-form { display: flex; gap: 20px; background: #fff; padding: 25px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; width: 100%; }
         .post-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; }
         .post-card img { width: 100%; height: 200px; object-fit: cover; }
         .post-card-body { padding: 15px; flex: 1; }
-        .post-card h4 { margin: 0 0 10px 0; font-size: 18px; color: #333; }
-        .post-card p { margin: 0; font-size: 14px; color: #666; line-height: 1.5; white-space: pre-wrap; }
-        .post-card .date { font-size: 11px; color: #bbb; margin-top: 10px; }
-        .delete-post-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,0,0,0.7); color: white; border: none; width: 25px; height: 25px; border-radius: 50%; cursor: pointer; font-size: 12px; }
+        .post-card h4 { margin: 0 0 10px 0; color: #333; }
+        .post-card p { margin: 0; font-size: 14px; color: #666; white-space: pre-wrap; line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <h1>캐릭터 시트 & 3D 아카이브</h1>
+    <h1>캐릭터 시트 & 3D 공유 아카이브</h1>
 
     <div class="container">
-        <!-- 1. 입력부 -->
+        <!-- 정보 입력부 -->
         <div class="box">
             <h3>정보 입력</h3>
-            <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
-            <img id="preview" src="#" alt="미리보기">
             <input type="text" id="charName" placeholder="캐릭터 특징 (예: 은발의 마법사)">
-            <textarea id="outfit" placeholder="주요 의상 (예: 푸른색 로브, 금색 장식)"></textarea>
-            <textarea id="items" placeholder="아이템 상세 (예: 마법 지팡이, 가죽 고서)"></textarea>
+            <textarea id="outfit" placeholder="주요 의상 정보"></textarea>
+            <textarea id="items" placeholder="아이템 상세 정보"></textarea>
             <button onclick="generatePrompts()">프롬프트 생성하기</button>
         </div>
 
-        <!-- 2. 결과부 -->
+        <!-- 프롬프트 결과부 -->
         <div class="box">
             <h3>프롬프트 결과</h3>
-            <p style="font-size: 13px; font-weight: bold; margin-bottom: 5px;">3면도 프롬프트:</p>
-            <textarea id="refSheet"></textarea>
+            <p style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">AI 이미지 생성 프롬프트:</p>
+            <textarea id="refSheet" style="height: 150px;"></textarea>
             <button class="copy-btn" onclick="copyText('refSheet')">복사하기</button>
-
-            <p style="font-size: 13px; font-weight: bold; margin-bottom: 5px; margin-top: 10px;">아이템 시트 프롬프트:</p>
-            <textarea id="itemSheet"></textarea>
-            <button class="copy-btn" onclick="copyText('itemSheet')">복사하기</button>
         </div>
 
-        <!-- 3. 3D 뷰어부 -->
+        <!-- 3D 프리뷰부 -->
         <div class="box">
             <h3>Character 3D Preview</h3>
             <div class="viewer-box">
@@ -91,67 +79,128 @@
                     <button id="rotateBtn" class="ctrl-btn">Auto Rotate: OFF</button>
                     <div class="ctrl-slider">
                         <span id="expLabel">Brightness: 1.0</span>
-                        <input type="range" id="expSlider" min="0" max="3" step="0.1" value="1.0" style="width: 100%;">
+                        <input type="range" id="expSlider" min="0" max="3" step="0.1" value="1.0">
                     </div>
                     <div id="statsBox" class="ctrl-stats">Vertices: -<br>Faces: -</div>
                 </div>
-                <!-- 여기에 본인의 .glb 파일 이름을 넣으세요 -->
-                <model-viewer id="mainViewer" src="Wizard.glb" camera-controls shadow-intensity="1" environment-image="neutral">
-                </model-viewer>
+                <!-- 3D 모델 파일명이 Wizard.glb가 아니면 아래 src를 수정하세요 -->
+                <model-viewer id="mainViewer" src="Wizard.glb" camera-controls shadow-intensity="1" environment-image="neutral"></model-viewer>
             </div>
-            <p style="font-size: 11px; color: #888; margin-top: 8px; text-align: center;">드래그: 회전 / 휠: 확대</p>
+            <p style="font-size: 11px; color: #888; text-align: center; margin-top: 5px;">드래그: 회전 / 휠: 확대</p>
         </div>
     </div>
 
-    <!-- 4. 게시판(아카이브) 구역 -->
+    <!-- 게시판 구역 -->
     <div class="archive-section">
-        <h2 style="color: white; text-align: center; margin-bottom: 30px;">Character Archive</h2>
-        
-        <!-- 글쓰기 폼 -->
+        <h2 style="color: white; text-align: center; margin-bottom: 25px;">Public Character Archive</h2>
         <div class="post-form">
             <div style="flex: 0 0 200px;">
-                <p style="font-size: 12px; margin-bottom: 5px; color: #666;">캐릭터 대표 이미지</p>
-                <input type="file" id="archiveImage" accept="image/*" style="font-size: 11px;">
+                <p style="font-size: 11px; margin-bottom: 5px; color: #666;">이미지 (1MB 이상도 가능)</p>
+                <input type="file" id="archiveImage" accept="image/*">
             </div>
             <div style="flex: 1;">
-                <input type="text" id="archiveTitle" placeholder="캐릭터 이름 또는 제목" style="margin-bottom: 10px;">
-                <textarea id="archiveContent" placeholder="캐릭터의 설정이나 특징을 기록하세요." style="height: 100px; margin-bottom: 0;"></textarea>
+                <input type="text" id="archiveTitle" placeholder="캐릭터 이름">
+                <textarea id="archiveContent" placeholder="캐릭터의 설정을 자유롭게 적어보세요." style="height: 80px; margin-bottom: 0;"></textarea>
             </div>
             <div style="flex: 0 0 150px; display: flex; align-items: flex-end;">
-                <button onclick="savePost()" style="height: 100px; background-color: #10b981; margin-bottom: 0;">아카이브 등록</button>
+                <button id="uploadBtn" style="height: 80px; background-color: #10b981; margin-bottom: 0;">전세계 공유</button>
             </div>
         </div>
-
-        <!-- 리스트 출력 -->
         <div id="postGrid" class="post-grid"></div>
     </div>
 
-    <script>
-        /* [1. 기본 프롬프트 기능] */
-        function previewImage(event) {
-            const preview = document.getElementById('preview');
-            const file = event.target.files[0];
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "firebase/firestore";
+
+        // [Firebase 설정]
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhX4LCYx7jA7zrhOsgRTISyc4TkLDBctg",
+            authDomain: "comfyriadatabase.firebaseapp.com",
+            projectId: "comfyriadatabase",
+            storageBucket: "comfyriadatabase.firebasestorage.app",
+            messagingSenderId: "865184071401",
+            appId: "1:865184071401:web:096466cabb3adb489efa78",
+            measurementId: "G-GNQ7S5DBEG"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // [이미지 압축 및 텍스트 변환 함수] - 1MB 제한 해결용
+        const compressAndToBase64 = (file) => new Promise((resolve) => {
             const reader = new FileReader();
-            reader.onload = () => { preview.src = reader.result; preview.style.display = 'block'; }
-            if (file) reader.readAsDataURL(file);
-        }
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
 
-        function generatePrompts() {
-            const name = document.getElementById('charName').value;
-            const outfit = document.getElementById('outfit').value;
-            const items = document.getElementById('items').value;
-            document.getElementById('refSheet').value = `Character sheet of ${name}, wearing ${outfit}, front view, side view, back view, standing on white background, anime style, flat color, masterpiece.`;
-            document.getElementById('itemSheet').value = `Design sheet of isolated items for ${name}, including ${outfit} and ${items}. Professional reference sheet, white background.`;
-        }
+                    const MAX_WIDTH = 1000; // 가로 1000px로 제한
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // 화질 70% 압축
+                };
+            };
+        });
 
-        function copyText(id) {
-            const textarea = document.getElementById(id);
-            textarea.select();
-            document.execCommand('copy');
-            alert('복사되었습니다!');
-        }
+        // [업로드 로직]
+        const uploadBtn = document.getElementById('uploadBtn');
+        uploadBtn.onclick = async () => {
+            const title = document.getElementById('archiveTitle').value;
+            const content = document.getElementById('archiveContent').value;
+            const file = document.getElementById('archiveImage').files[0];
 
-        /* [2. 3D 뷰어 조작 로직] */
+            if (!title || !file) { alert("이미지와 이름을 넣어주세요!"); return; }
+            
+            uploadBtn.innerText = "압축 및 전송 중...";
+            uploadBtn.disabled = true;
+
+            try {
+                const compressedImg = await compressAndToBase64(file);
+                await addDoc(collection(db, "posts"), {
+                    title: title,
+                    content: content,
+                    image: compressedImg,
+                    createdAt: new Date()
+                });
+                alert("공유 완료!");
+                document.getElementById('archiveTitle').value = '';
+                document.getElementById('archiveContent').value = '';
+                document.getElementById('archiveImage').value = '';
+            } catch (e) {
+                console.error(e);
+                alert("실패! Firestore의 '테스트 모드' 설정을 확인하세요.");
+            } finally {
+                uploadBtn.innerText = "전세계 공유";
+                uploadBtn.disabled = false;
+            }
+        };
+
+        // [실시간 리스트 불러오기]
+        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const grid = document.getElementById('postGrid');
+            grid.innerHTML = '';
+            snapshot.forEach((doc) => {
+                const post = doc.data();
+                const card = document.createElement('div');
+                card.className = 'post-card';
+                card.innerHTML = `<img src="${post.image}"><div class="post-card-body"><h4>${post.title}</h4><p>${post.content}</p></div>`;
+                grid.appendChild(card);
+            });
+        });
+
+        // [3D 컨트롤 & 프롬프트 함수]
         const mv = document.querySelector('#mainViewer');
         const wireframeBtn = document.querySelector('#wireframeBtn');
         const rotateBtn = document.querySelector('#rotateBtn');
@@ -159,119 +208,37 @@
         const expLabel = document.querySelector('#expLabel');
         const statsBox = document.querySelector('#statsBox');
 
-        let wireframeActive = false;
-
+        let wireActive = false;
         wireframeBtn.onclick = () => {
-            wireframeActive = !wireframeActive;
-            const sceneSymbol = Object.getOwnPropertySymbols(mv).find(s => s.description === 'scene');
-            const scene = mv[sceneSymbol];
-            if (scene) {
-                scene.traverse((obj) => {
-                    if (obj.isMesh && obj.material) {
-                        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-                        mats.forEach(m => { m.wireframe = wireframeActive; });
-                    }
-                });
-            }
-            wireframeBtn.innerText = `Wireframe: ${wireframeActive ? 'ON' : 'OFF'}`;
-            wireframeBtn.classList.toggle('active', wireframeActive);
+            wireActive = !wireActive;
+            const scene = mv[Object.getOwnPropertySymbols(mv).find(s => s.description === 'scene')];
+            if (scene) scene.traverse(obj => { if(obj.isMesh && obj.material) (Array.isArray(obj.material)?obj.material:[obj.material]).forEach(m=>m.wireframe=wireActive); });
+            wireframeBtn.innerText = `Wireframe: ${wireActive?'ON':'OFF'}`;
+            wireframeBtn.classList.toggle('active', wireActive);
         };
-
         rotateBtn.onclick = () => {
-            const active = mv.hasAttribute('auto-rotate');
-            if (active) mv.removeAttribute('auto-rotate');
-            else mv.setAttribute('auto-rotate', '');
-            rotateBtn.innerText = `Auto Rotate: ${!active ? 'ON' : 'OFF'}`;
-            rotateBtn.classList.toggle('active', !active);
+            const rot = mv.hasAttribute('auto-rotate');
+            rot ? mv.removeAttribute('auto-rotate') : mv.setAttribute('auto-rotate', '');
+            rotateBtn.innerText = `Auto Rotate: ${!rot?'ON':'OFF'}`;
+            rotateBtn.classList.toggle('active', !rot);
         };
-
-        expSlider.oninput = (e) => {
-            mv.setAttribute('exposure', e.target.value);
-            expLabel.innerText = `Brightness: ${Number(e.target.value).toFixed(1)}`;
-        };
-
+        expSlider.oninput = (e) => { mv.setAttribute('exposure', e.target.value); expLabel.innerText = `Brightness: ${e.target.value}`; };
         mv.addEventListener('load', () => {
-            let v = 0, f = 0;
-            const sceneSymbol = Object.getOwnPropertySymbols(mv).find(s => s.description === 'scene');
-            const scene = mv[sceneSymbol];
-            if (scene) {
-                scene.traverse((obj) => {
-                    if (obj.isMesh && obj.geometry) {
-                        v += obj.geometry.attributes.position.count;
-                        f += obj.geometry.index ? obj.geometry.index.count / 3 : obj.geometry.attributes.position.count / 3;
-                    }
-                });
-                statsBox.innerHTML = `Vertices: ${new Intl.NumberFormat().format(v)}<br>Faces: ${new Intl.NumberFormat().format(Math.floor(f))}`;
-            }
+            let v=0, f=0;
+            const scene = mv[Object.getOwnPropertySymbols(mv).find(s => s.description === 'scene')];
+            if(scene) scene.traverse(obj => { if(obj.isMesh && obj.geometry) { v+=obj.geometry.attributes.position.count; f+=obj.geometry.index?obj.geometry.index.count/3:obj.geometry.attributes.position.count/3; }});
+            statsBox.innerHTML = `Vertices: ${new Intl.NumberFormat().format(v)}<br>Faces: ${new Intl.NumberFormat().format(Math.floor(f))}`;
         });
 
-        /* [3. 게시판(아카이브) 로직] */
-        window.addEventListener('DOMContentLoaded', displayPosts);
-
-        function savePost() {
-            const title = document.getElementById('archiveTitle').value;
-            const content = document.getElementById('archiveContent').value;
-            const imgInput = document.getElementById('archiveImage');
-            
-            if (!title || !content) { alert("제목과 내용을 입력해주세요."); return; }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const posts = JSON.parse(localStorage.getItem('memo_posts') || '[]');
-                const newPost = {
-                    id: Date.now(),
-                    title: title,
-                    content: content,
-                    image: e.target.result,
-                    date: new Date().toLocaleDateString()
-                };
-                posts.unshift(newPost);
-                localStorage.setItem('memo_posts', JSON.stringify(posts));
-                
-                // 입력창 초기화
-                document.getElementById('archiveTitle').value = '';
-                document.getElementById('archiveContent').value = '';
-                imgInput.value = '';
-                displayPosts();
-            };
-
-            if (imgInput.files[0]) {
-                reader.readAsDataURL(imgInput.files[0]);
-            } else {
-                // 이미지가 없을 때 기본 이미지
-                reader.onload({ target: { result: 'https://via.placeholder.com/400x300?text=No+Image' } });
-            }
-        }
-
-        function displayPosts() {
-            const grid = document.getElementById('postGrid');
-            const posts = JSON.parse(localStorage.getItem('memo_posts') || '[]');
-            grid.innerHTML = '';
-
-            posts.forEach(post => {
-                const card = document.createElement('div');
-                card.className = 'post-card';
-                card.innerHTML = `
-                    <button class="delete-post-btn" onclick="deletePost(${post.id})">×</button>
-                    <img src="${post.image}">
-                    <div class="post-card-body">
-                        <h4>${post.title}</h4>
-                        <p>${post.content}</p>
-                        <div class="date">${post.date}</div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function deletePost(id) {
-            if (confirm("삭제하시겠습니까?")) {
-                let posts = JSON.parse(localStorage.getItem('memo_posts') || '[]');
-                posts = posts.filter(p => p.id !== id);
-                localStorage.setItem('memo_posts', JSON.stringify(posts));
-                displayPosts();
-            }
-        }
+        window.generatePrompts = function() {
+            const name = document.getElementById('charName').value;
+            const outfit = document.getElementById('outfit').value;
+            const items = document.getElementById('items').value;
+            document.getElementById('refSheet').value = `Character sheet of ${name}, wearing ${outfit}, ${items}, front view, side view, back view, standing on white background, high quality, anime style.`;
+        };
+        window.copyText = function(id) {
+            const t = document.getElementById(id); t.select(); document.execCommand('copy'); alert('복사 완료!');
+        };
     </script>
 </body>
 </html>
